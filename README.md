@@ -1,3 +1,13 @@
+<div align="center">
+https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
+https://img.shields.io/badge/FastStream-005571?style=for-the-badge&logo=fastapi
+https://img.shields.io/badge/TaskIQ-FF6F00?style=for-the-badge&logo=task
+https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+https://img.shields.io/badge/redis-%2523DD0031.svg?style=for-the-badge&logo=redis&logoColor=white
+https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white
+
+</div>
+
 # Orders API
 
 Базовый проект для развёртывания 2 сущностей: API + Event bus Consumer.\
