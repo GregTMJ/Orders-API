@@ -1,0 +1,52 @@
+[project]
+name = "simple-api"
+version = "0.1.0"
+readme = "README.md"
+description = "Simple project to handle orders asynchrounously"
+authors = [{ name = "gregory saliba", email = "gregtmj@gmail.com" }]
+requires-python = ">=3.14"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "alembic>=1.18.3",
+    "fastapi>=0.128.5",
+    "pydantic[email]>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "sqlalchemy>=2.0.46",
+    "uvicorn>=0.40.0",
+    "passlib[bcrypt]>=1.7.4",
+    "asyncpg>=0.31.0",
+    "python-json-logger>=4.0.0",
+    "python-jose>=3.5.0",
+    "bcrypt==4.3.0",
+    "redis>=7.1.1",
+    "fastapi-limiter>=0.2.0",
+    "orjson>=3.11.7",
+    "taskiq-faststream>=0.4.0",
+    "aio-pika>=9.5.8",
+    "faststream[cli,rabbit]>=0.6.6",
+    "taskiq-aio-pika>=0.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+]
+
+[tool.ruff]
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+extend-select = ["A", "I"]
+
+
+[tool.alembic]
+script_location = "%(here)s/migrations"
+file_template = "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
+prepend_sys_path = [
+    "."
+]
+truncate_slug_length = 40
+output_encoding = "utf-8"

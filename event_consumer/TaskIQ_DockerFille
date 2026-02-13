@@ -1,0 +1,10 @@
+FROM ghcr.io/astral-sh/uv:python3.14-alpine
+
+WORKDIR /usr/src/app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked
+
+COPY . .
+
+CMD uv run taskiq worker --fs-discover --ack-type when_executed --workers 1 taskiq_core.broker:broker

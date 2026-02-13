@@ -1,0 +1,28 @@
+[project]
+name = "event-consumer"
+version = "0.1.0"
+description = "Part of project set to consume from RMQ and send to TaskIQ"
+authors = [{ name = "gregory saliba", email = "gregtmj@gmail.com" }]
+requires-python = ">=3.14"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "faststream[cli,rabbit]>=0.6.6",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "taskiq-aio-pika>=0.5.0",
+    "uvicorn>=0.40.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+]
+
+[tool.ruff]
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+extend-select = ["A", "I"]

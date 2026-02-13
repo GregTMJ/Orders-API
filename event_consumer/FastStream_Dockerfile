@@ -1,0 +1,12 @@
+FROM ghcr.io/astral-sh/uv:python3.14-alpine
+
+WORKDIR /usr/src/app
+
+COPY --from=ghcr.io/tarampampam/curl:8.6.0 /bin/curl /usr/local/bin/curl
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked
+
+COPY . .
+
+CMD uv run uvicorn main:app --host 0.0.0.0 --port 8000

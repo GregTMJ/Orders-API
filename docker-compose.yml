@@ -1,0 +1,114 @@
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      test: [ "CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}" ]
+  rabbit:
+    image: 'rabbitmq:4.2.3-management-alpine'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: "/"
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: ["CMD", "rabbitmqctl", "status"]
+    ports:
+      - "15672:15672"
+      - "${RMQ_PORT}:5672"
+    restart: unless-stopped
+  redis:
+    image: redis:latest
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - "6379:6379"
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+  api:
+    build:
+      context: api
+      args:
+        BUILDKIT_INLINE_CACHE: 0
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/ping/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  faststream_event_consumer:
+    container_name: faststream_event_consumer
+    build:
+      context: event_consumer
+      args:
+        BUILDKIT_INLINE_CACHE: 0
+      dockerfile: FastStream_Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  taskiq_event_consumer:
+    container_name: taskiq_event_consumer
+    build:
+      context: event_consumer
+      args:
+        BUILDKIT_INLINE_CACHE: 0
+      dockerfile: TaskIQ_DockerFille
+    env_file:
+      - .env
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      faststream_event_consumer:
+        condition: service_healthy
